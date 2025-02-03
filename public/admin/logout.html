@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <script>
+        localStorage.removeItem('token'); // Remove the token from localStorage
+        localStorage.removeItem('skillpets');
+        console.log("ok");
+
+        // Optionally, redirect the user to the login page or somewhere else
+        window.location.href = '/login.html';
+    </script>
+</body>
+
+</html>

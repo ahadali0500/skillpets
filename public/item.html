@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        .navbar,
+        footer {
+            background-color: #1f1f1f;
+        }
+
+        .inventory-item {
+            background-color: #1f1f1f;
+            border: 1px solid #8a2be2;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: #8a2be2;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #8f6af0;
+        }
+
+        .warning-message {
+            text-align: center;
+            color: #ff6b6b;
+            font-size: 1.2rem;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar-placeholder"></div>
+    <main class="container mt-5">
+        <div id="warningMessage" class="warning-message d-none">
+            Please log in first to view Item Shop.
+        </div>
+        <h1 class="text-center mb-4">Item Shop</h1>
+        <div class="row" id="inventoryItems"></div>
+    </main>
+    <footer style="position: fixed;bottom: 0px;width: 100%;" class="mt-auto py-3 text-center">
+        <p>Created for Educational Purposes. © 2025</p>
+    </footer>
+    <!-- Modal -->
+    <div class="modal fade" id="useItemModal" tabindex="-1" aria-labelledby="useItemModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: #1f1f1f; color: #ffffff;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="useItemModalLabel">Enter Quantity</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="useItemForm">
+                        <div class="mb-3">
+                            <label for="itemQuantity" class="form-label">Quantity to use</label>
+                            <input type="number" class="form-control" id="itemQuantity" name="quantity" min="1"
+                                required>
+                        </div>
+                        <input type="hidden" id="currentItemId">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"
+        integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS"
+        crossorigin="anonymous"></script>
+    <script src="js/inventory.js"></script>
+    <script src="js/navconfig.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const apiUrl = `${window.location.protocol}//${window.location.host}/api/items`;
+            const inventoryItemsContainer = document.getElementById('inventoryItems');
+            const warningMessage = document.getElementById('warningMessage');
+            const skillpets = JSON.parse(localStorage.getItem("skillpets"));
+            if (!skillpets.user_id) {
+                return;
+            }
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(items => {
+                    if (items.length === 0) {
+                        warningMessage.classList.remove('d-none');
+                        warningMessage.textContent = 'No items in your inventory.';
+                        return;
+                    }
+                    items.items.forEach(item => {
+                        const itemHtml = `
+                            <div class="col-md-4">
+                                <div class="inventory-item">
+                                    <h3>${item.item_name}</h3>
+                                    <p>Effect happiness: ${item.effect_happiness}</p>
+                                    <p>price: $${item.price}</p>
+                                    <button class="btn btn-primary use-item-btn" data-id="${item.item_id}" data-max="${item.quantity}">Add to Inventory</button>
+                                </div>
+                            </div>
+                        `;
+                        inventoryItemsContainer.innerHTML += itemHtml;
+                    });
+                    document.querySelectorAll('.use-item-btn').forEach(button => {
+                        button.addEventListener('click', function () {
+                            const itemId = this.getAttribute('data-id');
+                            document.getElementById('currentItemId').value = itemId;
+                            const itemQuantityInput = document.getElementById('itemQuantity');
+                            itemQuantityInput.value = '';  // Reset the input
+                            $('#useItemModal').modal('show');
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Failed to load inventory:', error);
+                    warningMessage.classList.remove('d-none');
+                    warningMessage.textContent = 'Failed to load inventory. Please try again later.';
+                });
+
+            document.getElementById('useItemForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const itemId = document.getElementById('currentItemId').value;
+                const quantityUsed = document.getElementById('itemQuantity').value;
+                updateItemUsage(itemId, quantityUsed);
+            });
+        });
+
+        function updateItemUsage(itemId, quantity) {
+            const skillpets = JSON.parse(localStorage.getItem("skillpets"));
+            const updateUrl = `${window.location.protocol}//${window.location.host}/api/inventory/users/${skillpets.user_id}/buy`;
+            fetch(updateUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ quantity, item_id: itemId, quantity })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    $('#useItemModal').modal('hide');
+                    //location.reload(); // Reload to update the item list
+                })
+                .catch(error => {
+                    console.log(error);
+
+                    alert('Error using item:', error);
+                });
+        }
+    </script>
+</body>
+
+</html>
