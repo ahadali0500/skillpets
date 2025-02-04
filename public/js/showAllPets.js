@@ -1,4 +1,18 @@
 document.addEventListener("DOMContentLoaded", function () {
+  const skillpets = JSON.parse(localStorage.getItem("skillpets"));
+  if (!skillpets || !skillpets.user_id) {
+    console.log('Please log in first to view your inventory.');
+
+    // If you have an element with an id of 'not', you can directly use `getElementById`
+    const notElement = document.getElementById('not');
+    if (notElement) {
+      notElement.innerHTML = 'Please log in first to view your inventory.';
+    }
+
+    return;
+  }
+  // Continue with your logic, since skillpets is verified to exist and have a user_id
+
   const token = localStorage.getItem("token");
   const isLoggedIn = token !== null;
 
@@ -23,11 +37,10 @@ document.addEventListener("DOMContentLoaded", function () {
             <h3>${pet.pet_name}</h3>
               <h5>${pet.species}</h5>
               <p>Happiness: ${pet.happiness_level}</p>
-              ${
-                isLoggedIn
-                  ? `<button class="btn btn-primary btn-adopt" data-pet-id="${pet.pet_id}">Adopt ${pet.species}</button>`
-                  : `<p class="text-muted">Login to adopt this pet.</p>`
-              }
+              ${isLoggedIn
+            ? `<button class="btn btn-primary btn-adopt" data-pet-id="${pet.pet_id}">Adopt ${pet.species}</button>`
+            : `<p class="text-muted">Login to adopt this pet.</p>`
+          }
             </div>
           </div>
         `;
@@ -54,9 +67,9 @@ document.addEventListener("DOMContentLoaded", function () {
 // Function to handle pet adoption
 function adoptPet(petId) {
   const skillpets = JSON.parse(localStorage.getItem("skillpets"));
-  const data ={
-    pet_id:petId,
-    user_id:skillpets.user_id
+  const data = {
+    pet_id: petId,
+    user_id: skillpets.user_id
   }
   fetch(`${window.location.protocol}//${window.location.host}/api/user-pets/adopt`, {
     method: "POST",

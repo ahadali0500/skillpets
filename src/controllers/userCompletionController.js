@@ -1,4 +1,5 @@
 const model = require('../models/userCompletionModel.js');
+const reviewModel = require('../models/reviewModel.js');
 
 //Create a completion record for challenge 
 module.exports.insertChallengeRecord = (req, res, next) => {
@@ -27,6 +28,9 @@ module.exports.insertChallengeRecord = (req, res, next) => {
                 error: error
             });
         }
+
+
+
 
         // Attach data to the request object for the next middleware
         req.challengeData = {
@@ -69,7 +73,7 @@ module.exports.insertChallengeRecord = (req, res, next) => {
 //     model.updateSkillPoints(user_id, awardedSkillpoints, callback);
 // };
 
-module.exports.checkBodyUserIdExists = (req, res, next) => {   
+module.exports.checkBodyUserIdExists = (req, res, next) => {
     const data = {
         user_id: req.body.user_id
     };
@@ -131,68 +135,72 @@ module.exports.checkAllChallengeRecords = (req, res, next) => {
 
 
 
-  
-  //updateUserSkillpointsAndRespond
+
+//updateUserSkillpointsAndRespond
 module.exports.updateUserSkillpointsAndRespond = (req, res) => {
+    console.log(req.body);
+
     const { user_id } = req.body;
-    const { completionId, awardedSkillpoints } = req;
-  
+    const { completionId, reward } = req;
+
     // Ensure completed is explicitly parsed as a boolean
     const completed = req.body.completed === "true" || req.body.completed === true;
-  
+
     const data = {
-      user_id,
-      skillpoints: awardedSkillpoints,
-    };
-  
-    const callback = (error) => {
-      if (error) {
-        console.error("Error in updateUserSkillpoints:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
-      }
-  
-      res.status(201).json({
-        complete_id: completionId,
-        challenge_id: req.params.challenge_id,
         user_id,
-        completed, // Return the parsed boolean value
-        creation_date: req.body.creation_date,
-        notes: req.body.notes,
-      });
+        skillpoints: reward,
     };
-  
+
+    const callback = (error) => {
+        if (error) {
+            console.error("Error in updateUserSkillpoints:", error);
+            return res.status(500).json({ message: "Internal Server Error" });
+        }
+
+        reviewModel.insertReview({ user_id, challenge_id: req.body.challengeId, review: req.body.review, rating: req.body.rating }, ()=>{});
+
+        res.status(201).json({
+            complete_id: completionId,
+            challenge_id: req.params.challenge_id,
+            user_id,
+            completed, // Return the parsed boolean value
+            creation_date: req.body.creation_date,
+            notes: req.body.notes,
+        });
+    };
+
     model.updateUserSkillpoints(data, callback);
-  };//createCompletionRecord
-  module.exports.createCompletionRecord = (req, res, next) => {
+};//createCompletionRecord
+module.exports.createCompletionRecord = (req, res, next) => {
     const { challenge_id } = req.params;
     const { user_id, completed, creation_date, notes } = req.body;
     const { skillpoints } = req.challenge;
-  
+
     // Ensure completed is explicitly parsed as a boolean
     const isCompleted = completed === "true" || completed === true;
-  
+
     // Award 5 skill points if completed is false
     const awardedSkillpoints = isCompleted ? skillpoints : 5;
-  
+
     const data = {
-      challenge_id,
-      user_id,
-      completed: isCompleted ? 1 : 0, // Convert boolean to 1/0 for database
-      creation_date,
-      notes,
-      skillpoints_awarded: awardedSkillpoints, // Include awarded skill points
+        challenge_id,
+        user_id,
+        completed: isCompleted ? 1 : 0, // Convert boolean to 1/0 for database
+        creation_date,
+        notes,
+        skillpoints_awarded: awardedSkillpoints, // Include awarded skill points
     };
-  
+
     const callback = (error, results) => {
-      if (error) {
-        console.error("Error in insertCompletionRecord:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
-      }
-  
-      req.completionId = results.insertId;
-      req.awardedSkillpoints = awardedSkillpoints;
-      next();
+        if (error) {
+            console.error("Error in insertCompletionRecord:", error);
+            return res.status(500).json({ message: "Internal Server Error" });
+        }
+
+        req.completionId = results.insertId;
+        req.awardedSkillpoints = awardedSkillpoints;
+        next();
     };
-  
-    model.insertCompletionRecord(data, callback);
-  };
+
+    model.insertCompletionRecord(data, callback);
+};

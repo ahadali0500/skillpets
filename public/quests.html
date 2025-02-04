@@ -51,8 +51,9 @@
   <div id="navbar-placeholder"></div>
   <main class="py-4">
     <div class="container">
+      <div id="not" ></div>
       <h1 class="text-center mb-4">Active Quests</h1>
-      <div id="questsList" class="list-group"></div>
+      <div id="questsList" style="padding-bottom: 80px;" class="list-group"></div>
     </div>
   </main>
 
@@ -79,7 +80,7 @@
     </div>
   </div>
 
-  <footer class="mt-auto py-3 text-center">
+  <footer style="position: fixed; bottom: 0; width: 100%;" class="mt-auto py-3 text-center">
     <p>Created for Educational Purposes. All rights reserved.</p>
   </footer>
 
@@ -90,13 +91,25 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const skillpets = JSON.parse(localStorage.getItem("skillpets"));
-            if (!skillpets.user_id) {
-                return;
-            }
-      const warningMessage = document.getElementById('warningMessage');
-      if (!skillpets.user_id) {
+      if (!skillpets || !skillpets.user_id) {
+        console.log('Please log in first to view your Quest.');
+
+        // If you have an element with an id of 'not', you can directly use `getElementById`
+        const notElement = document.getElementById('not');
+        if (notElement) {
+          notElement.innerHTML = 'Please log in first to view your Quest.';
+        }
+
+        // If 'warningMessage' is supposed to be a class used in multiple elements, you'll need to handle each
+        const warningMessages = document.querySelectorAll('.warningMessage');
+        warningMessages.forEach(message => {
+          message.classList.remove("d-none");
+        });
+
         return;
       }
+      // Continue with your logic, since skillpets is verified to exist and have a user_id
+
       const apiUrl = `${window.location.protocol}//${window.location.host}/api/quests/all`;
       fetch(apiUrl)
         .then(response => response.json())
@@ -133,7 +146,7 @@
     function showQuestModal(questId, reward) {
       $('#questForm').off('submit').on('submit', function (e) {
         e.preventDefault();
-        
+
         const selectedPetId = document.getElementById('petSelect').value;
         completeQuest(questId, selectedPetId, reward);
       });

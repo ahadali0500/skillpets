@@ -43,11 +43,11 @@ module.exports.validateUserExistence = (req, res, next) => {
 };
 
 module.exports.validateChallengeExistence = (req, res, next) => {
-    const { challenge_id } = req.body;
+    const { challenge_id } = req.params;
 
     challengeModel.getChallengeById(challenge_id, (error, results) => {
-     
-        
+
+
         if (results.length <= 0) {
             return res.status(404).json({ message: `Challenge with ID ${challenge_id} does not exist.` });
         }
@@ -56,7 +56,7 @@ module.exports.validateChallengeExistence = (req, res, next) => {
             return res.status(500).json({ message: "Error checking challenge existence.", error });
         }
 
-        
+
 
         next(); // Challenge exists, proceed to the next middleware or controller
     });
@@ -144,9 +144,9 @@ module.exports.validateReviewOwnership = (req, res, next) => {
         next(); // User owns the review, proceed
     });
 };
-module.exports.updateReview = (req, res) => {
+module.exports.updateReview = (req, res, next) => {
     const { user_id, review_id } = req.params;
-    const { review, rating } = req.body;
+    const { review, rating, reward } = req.body;
 
     const callback = (error, results) => {
         if (error) {
@@ -157,7 +157,9 @@ module.exports.updateReview = (req, res) => {
             return res.status(404).json({ message: "Review not found or no changes were made." });
         }
 
+        reviewModel.updateReviewpionts({skillpoints:Number(reward), user_id})
         res.status(200).json({ message: "Review updated successfully!" });
+
     };
 
     reviewModel.updateReview({ review_id, review, rating }, callback);

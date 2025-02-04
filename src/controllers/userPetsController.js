@@ -1,23 +1,31 @@
 const userPetsModel = require("../models/userPetsModel");
 
 // Controller to adopt a pet
-module.exports.adoptPet = (req, res) => {
+module.exports.adoptPet = async (req, res) => {
     const { user_id, pet_id } = req.body;
 
     if (!user_id || !pet_id) {
         return res.status(400).json({ message: "Missing user_id or pet_id." });
     }
 
-    userPetsModel.adoptPet(user_id, pet_id, (error, results) => {
-        if (error) {
-            return res.status(500).json({ message: "Error adopting pet.", error });
+    try {
+        const userSkillPoints = await userPetsModel.checkUserSkillPoints(user_id);
+        const petCost = await userPetsModel.checkPetCost(pet_id);
+
+        if (userSkillPoints >= petCost) {
+            const user_pet_id = await userPetsModel.adoptPet(user_id, pet_id, petCost);
+            res.status(201).json({
+                message: "Pet adopted successfully!",
+                user_pet_id: user_pet_id
+            });
+        } else {
+            res.status(400).json({ message: "Insufficient skill points to adopt this pet." });
         }
-        res.status(201).json({
-            message: "Pet adopted successfully!",
-            user_pet_id: results.insertId
-        });
-    });
+    } catch (error) {
+        res.status(500).json({ message: "Error adopting pet.", error: error.message });
+    }
 };
+
 
 // Controller to get all pets owned by a user
 module.exports.getUserPets = (req, res) => {

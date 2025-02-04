@@ -27,7 +27,7 @@ module.exports.getReviewById = (review_id, callback) => {
     const SQLSTATEMENT = `
         SELECT review_id, user_id
         FROM Review
-        WHERE review_id = ? AND deleted = FALSE;
+        WHERE review_id = ? ;
     `;
     pool.query(SQLSTATEMENT, [review_id], callback);
 };
@@ -41,6 +41,15 @@ module.exports.updateReview = (data, callback) => {
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
+module.exports.updateReviewpionts = (data, callback) => {
+    const SQLSTATEMENT = `
+        UPDATE user
+        SET skillpoints= skillpoints + ?
+        WHERE user_id = ?;
+    `;
+    const VALUES = [data.skillpoints, data.user_id];
+    pool.query(SQLSTATEMENT, VALUES, callback);
+};
 
 //Delete
 
@@ -56,11 +65,7 @@ module.exports.softDeleteReview = (review_id, callback) => {
 module.exports.getReviewsByChallenge = (challenge_id, callback) => {
     const SQLSTATEMENT = `
         SELECT 
-            r.review_id,
-            r.review,
-            r.rating,
-            r.created_on,
-            u.username
+            *
         FROM Review r
         INNER JOIN User u ON r.user_id = u.user_id
         WHERE r.challenge_id = ?;

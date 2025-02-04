@@ -50,11 +50,10 @@
 <body>
     <div id="navbar-placeholder"></div>
     <main class="container mt-5">
-        <div id="warningMessage" class="warning-message d-none">
-            Please log in first to view Item Shop.
-        </div>
+        <div id="not" ></div>
+     
         <h1 class="text-center mb-4">Item Shop</h1>
-        <div class="row" id="inventoryItems"></div>
+        <div style="padding-bottom: 80px;" class="row" id="inventoryItems"></div>
     </main>
     <footer style="position: fixed;bottom: 0px;width: 100%;" class="mt-auto py-3 text-center">
         <p>Created for Educational Purposes. © 2025</p>
@@ -92,9 +91,20 @@
             const inventoryItemsContainer = document.getElementById('inventoryItems');
             const warningMessage = document.getElementById('warningMessage');
             const skillpets = JSON.parse(localStorage.getItem("skillpets"));
-            if (!skillpets.user_id) {
+            if (!skillpets || !skillpets.user_id) {
+                console.log('Please log in first to view your inventory.');
+
+                // If you have an element with an id of 'not', you can directly use `getElementById`
+                const notElement = document.getElementById('not');
+                if (notElement) {
+                    notElement.innerHTML = 'Please log in first to view your inventory.';
+                }
+
+
                 return;
             }
+            // Continue with your logic, since skillpets is verified to exist and have a user_id
+
             fetch(apiUrl)
                 .then(response => response.json())
                 .then(items => {

@@ -50,11 +50,12 @@
 <body>
   <div id="navbar-placeholder"></div>
   <main class="container mt-5">
+    <div id="not"></div>
     <div id="warningMessage" class="warning-message d-none">
       Please log in first to view your inventory.
     </div>
     <h1 class="text-center mb-4">Your Inventory</h1>
-    <div class="row" id="inventoryItems"></div>
+    <div class="row" style="padding-bottom: 80px;" id="inventoryItems"></div>
   </main>
   <footer style="position: fixed; bottom: 0; width: 100%;" class="mt-auto py-3 text-center">
     <p>Created for Educational Purposes. © 2025</p>
@@ -90,14 +91,31 @@
   <script src="js/navconfig.js" type="text/javascript"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+
       const skillpets = JSON.parse(localStorage.getItem("skillpets"));
+      if (!skillpets || !skillpets.user_id) {
+        console.log('Please log in first to view your inventory.');
+
+        // If you have an element with an id of 'not', you can directly use `getElementById`
+        const notElement = document.getElementById('not');
+        if (notElement) {
+          notElement.innerHTML = 'Please log in first to view your inventory.';
+        }
+
+        // If 'warningMessage' is supposed to be a class used in multiple elements, you'll need to handle each
+        const warningMessages = document.querySelectorAll('.warningMessage');
+        warningMessages.forEach(message => {
+          message.classList.remove("d-none");
+        });
+
+        return;
+      }
+      // Continue with your logic, since skillpets is verified to exist and have a user_id
+
       const apiUrl = `${window.location.protocol}//${window.location.host}/api/inventory/users/${skillpets.user_id}` // Adjust the API URL as needed
       const inventoryItemsContainer = document.getElementById('inventoryItems');
       const warningMessage = document.getElementById('warningMessage');
-      if (!skillpets.user_id) {
-        warningMessage.classList.remove("d-none");
-        return;
-      }
+
       fetch(apiUrl)
         .then(response => response.json())
         .then(items => {

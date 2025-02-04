@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (responseData.data.is_admin == 1) {
         window.location.href = "admin/index.html";
       } else {
-        window.location.href = "index.html";
+        window.location.href = "profile.html";
       }
     } else {
       // Show warning card with error message
