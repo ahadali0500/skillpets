@@ -42,89 +42,72 @@
     th:hover {
       color: #8a2be2;
     }
+    .top-three-container {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 2rem;
+    }
+    .top-three-box {
+      background-color: #333;
+      padding: 1rem;
+      border-radius: 10px;
+      text-align: center;
+      color: #bb86fc;
+      width: 30%;
+    }
   </style>
 </head>
 <body>
-  <!-- Navbar -->
   <div id="navbar-placeholder"></div>
-
-  <!-- Main Content -->
-  <div class="container leaderboard-container mt-4">
-    <br> <br>
-    <h2>Leaderboard</h2>
-    <table id="leaderboardTable">
-      <thead>
-        <tr>
-          <th onclick="sortTable(0)">#</th>
-          <th onclick="sortTable(1)">Username</th>
-          <th onclick="sortTable(2)">Email</th>
-          <th onclick="sortTable(3, true)">Skill Points</th>
-          <th onclick="sortTable(4)">Joined On</th>
-        </tr>
-      </thead>
-      <tbody id="playersList"></tbody>
-    </table>
+  <div class="container">
+    <br><br>
+    <h2 class="text-center">Leaderboard</h2>
+    <div class="top-three-container" id="topThreePlayers"></div> <!-- Container for top 3 players -->
+    <div class="leaderboard-container">
+      <table id="leaderboardTable">
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)">Rank</th>
+            <th onclick="sortTable(1)">Username</th>
+            <th onclick="sortTable(2, true)">Skill Points</th>
+          </tr>
+        </thead>
+        <tbody id="playersList"></tbody>
+      </table>
+    </div>
   </div>
-
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const apiUrl = `${window.location.protocol}//${window.location.host}/api/users`; // Adjust as needed
+      const apiUrl = `${window.location.protocol}//${window.location.host}/api/users`;
       fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
           const playersListDiv = document.getElementById('playersList');
+          const topThreeDiv = document.getElementById('topThreePlayers');
           data.sort((a, b) => b.skillpoints - a.skillpoints); // Sort by skill points descending
+
           data.forEach((player, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${index + 1}</td>
-              <td>${player.username}</td>
-              <td>${player.email}</td>
-              <td>${player.skillpoints}</td>
-              <td>${player.created_on}</td>
-            `;
-            playersListDiv.appendChild(row);
+            if (index < 3) {
+              const topPlayerBox = document.createElement('div');
+              topPlayerBox.className = 'top-three-box';
+              topPlayerBox.innerHTML = `
+                <h3>${index + 1}. ${player.username}</h3>
+                <p>${player.skillpoints} Points</p>
+              `;
+              topThreeDiv.appendChild(topPlayerBox);
+            } else {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${player.username}</td>
+                <td>${player.skillpoints}</td>
+              `;
+              playersListDiv.appendChild(row);
+            }
           });
         })
         .catch(error => console.error('Failed to load leaderboard:', error));
     });
-
-    function sortTable(n, numeric=false) {
-      var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-      table = document.getElementById("leaderboardTable");
-      switching = true;
-      dir = "asc";
-      while (switching) {
-        switching = false;
-        rows = table.rows;
-        for (i = 1; i < (rows.length - 1); i++) {
-          shouldSwitch = false;
-          x = rows[i].getElementsByTagName("TD")[n];
-          y = rows[i + 1].getElementsByTagName("TD")[n];
-          if (numeric) {
-            if (dir == "asc" && parseFloat(x.innerHTML) > parseFloat(y.innerHTML) || dir == "desc" && parseFloat(x.innerHTML) < parseFloat(y.innerHTML)) {
-              shouldSwitch = true;
-              break;
-            }
-          } else {
-            if (dir == "asc" && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase() || dir == "desc" && x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-              shouldSwitch = true;
-              break;
-            }
-          }
-        }
-        if (shouldSwitch) {
-          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-          switching = true;
-          switchcount++;
-        } else {
-          if (switchcount == 0 && dir == "asc") {
-            dir = "desc";
-            switching = true;
-          }
-        }
-      }
-    }
   </script>
   <script src="js/navconfig.js" type="text/javascript"></script>
 </body>

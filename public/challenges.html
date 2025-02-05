@@ -176,7 +176,7 @@
                     let reviewsContent = '<h6>Reviews:</h6>';
 
                     reviews.forEach(review => {
-                        reviewsContent += `<b>Rating:</b> ${review.rating} Stars, <strong>Review:</strong> ${review.review}<br><br>`;
+                        reviewsContent += `<b>UserName:</b> ${review.username}, <b>Rating:</b> ${review.rating} Stars, <strong>Review:</strong> ${review.review}<br><br>`;
                         if (review.user_id === userId) {
                             userReviewFound = review; // Update userReviewFound if the current user's review is found
                         }
@@ -223,7 +223,7 @@
                 note: notedata,
                 challengeId: challengeId,
                 creation_date: getMySQLTimestamp(),
-                reward: skillpoints
+                reward: Number(skillpoints)
             };
 
             const method = reviewId ? 'PUT' : 'POST';

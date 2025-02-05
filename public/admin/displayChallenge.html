@@ -141,7 +141,7 @@
                             <td>
                                 <button class="btn btn-primary btn-sm update-btn" data-id="${item.challenge_id}">Update</button>
                                 <button class="btn btn-danger btn-sm delete-btn" data-id="${item.challenge_id}">Delete</button>
-                                <a href="/admin/displayRating.html?challenge_id=${item.challenge_id}" ><button class="btn btn-secondary btn-sm delete-btn">Review</button></a>
+                                <a href="/admin/displayRating.html?challenge_id=${item.challenge_id}" target="_blank" ><button class="btn btn-secondary btn-sm delete-btn">Review</button></a>
                             </td>
                         </tr>`;
                         tableBody.innerHTML += row;

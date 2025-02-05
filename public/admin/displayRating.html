@@ -104,19 +104,53 @@
                     tableBody.innerHTML = '';  // Clear existing rows
 
                     data.forEach(item => {
-                        const row = `<tr id="user_${item.review_id}">
+                        const row = `<tr id="review_${item.review_id}">
                             <td>${item.review_id}</td>
                             <td>${item.review}</td>
                             <td>${item.rating}</td>
                             <td>${item.created_on}</td>
-                        </tr>`;
+                            <td><button type="button" class="btn btn-danger delete-btn" data-review-id="${item.review_id}">Delete</button></td>
+                        </tr>
+                        `;
                         tableBody.innerHTML += row;
                     });
 
+                    document.querySelectorAll('.delete-btn').forEach(button => {
+                        button.addEventListener('click', function () {
+                            const reviewId = this.getAttribute('data-review-id');
+                            deleteReview(reviewId);
+                        });
+                    });
                     addEventListeners();
                 })
                 .catch(error => console.error('Error loading the pets:', error));
         });
+
+        function deleteReview(reviewId) {
+            const confirmDelete = confirm('Are you sure you want to delete this review?');
+            if (confirmDelete) {
+                const skillpets = JSON.parse(localStorage.getItem("skillpets"));
+                const currentUrl = window.location.protocol + "//" + window.location.host;
+                const deleteEndpoint = `${currentUrl}/api/review/${reviewId}/users/${skillpets.user_id}`;
+
+                fetch(deleteEndpoint, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert('Review deleted successfully.');
+                        document.getElementById(`review_${reviewId}`).remove(); // Remove the row from the table
+                    })
+                    .catch(error => {
+                        console.error('Error deleting the review:', error);
+                        alert('Failed to delete the review.');
+                    });
+            }
+        }
+
     </script>
 
 

@@ -141,7 +141,7 @@ module.exports.updateUserSkillpointsAndRespond = (req, res) => {
     console.log(req.body);
 
     const { user_id } = req.body;
-    const { completionId, reward } = req;
+    const { completionId, reward } = req.body;
 
     // Ensure completed is explicitly parsed as a boolean
     const completed = req.body.completed === "true" || req.body.completed === true;
@@ -150,6 +150,7 @@ module.exports.updateUserSkillpointsAndRespond = (req, res) => {
         user_id,
         skillpoints: reward,
     };
+console.log(data,"datadata");
 
     const callback = (error) => {
         if (error) {
