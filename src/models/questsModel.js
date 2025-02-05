@@ -14,18 +14,22 @@ module.exports.createQuest = (data, callback) => {
 
 module.exports.getQuestsByUserId = (user_id, callback) => {
     const SQLSTATEMENT = `
-        SELECT 
-            q.quest_id,
-            q.quest,
-            q.reward,
-            q.status,
-            q.pet_id,
-            p.pet_name,
-            p.species
-        FROM Quests q
-        LEFT JOIN Pets p ON q.pet_id = p.pet_id
-      ;
-    `;
+    SELECT 
+        q.quest_id,
+        q.quest,
+        q.reward,
+        q.status,
+        q.pet_id,
+        p.pet_name,
+        p.species,
+        u.user_id,
+        u.username
+    FROM Quests q
+    LEFT JOIN Pets p ON q.pet_id = p.pet_id
+    LEFT JOIN user u ON q.user_id = u.user_id
+  ;
+`;
+
     pool.query(SQLSTATEMENT, [user_id], callback);
 };
 module.exports.validateQuestOwnership = (user_id, quest_id, callback) => {

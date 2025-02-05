@@ -60,6 +60,7 @@ module.exports.getUserQuests = (req, res, next) => {
                 error: error,
             });
         }
+        console.log(results);
 
         // if (results.length === 0) {
         //     return res.status(404).json({
@@ -69,6 +70,7 @@ module.exports.getUserQuests = (req, res, next) => {
 
         // Format the results
         const formattedResults = results.map((result) => ({
+            
             quest_id: result.quest_id,
             name: result.quest,
             reward: result.reward,
@@ -78,6 +80,10 @@ module.exports.getUserQuests = (req, res, next) => {
                 name: result.pet_name,
                 species: result.species,
             },
+            user: {
+                user_id: result.user_id,
+                username: result.username
+            }
         }));
 
         res.status(200).json({

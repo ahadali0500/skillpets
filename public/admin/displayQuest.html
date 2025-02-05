@@ -108,8 +108,8 @@
                     data.quests.forEach(item => {
                         const row = `<tr id="quest_${item.quest_id }">
                             <td>${item.quest_id }</td>
-                            <td>${item.user_id || 'Pending'}</td>
-                            <td>${item.pet_id || 'Pending'}</td>
+                            <td>${item.user.username || 'Pending'}</td>
+                            <td>${item.pet.name || 'Pending'}</td>
                             <td>${item.name}</td>
                             <td>${item.reward}</td>
                             <td>${item.status}</td>
