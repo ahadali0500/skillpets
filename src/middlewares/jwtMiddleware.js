@@ -50,7 +50,7 @@ module.exports.sendToken = (req, res, next) => {
     res.status(200).json({
       message: res.locals.message,
       token: res.locals.token,
-      data: res.locals.userData,
+      data: res.locals.data,
     });
   };
 //////////////////////////////////////////////////////

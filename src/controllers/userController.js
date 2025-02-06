@@ -362,7 +362,7 @@ module.exports.register = (req, res, next) => {
                 console.error("Error register callback: ", error);
                 res.status(500).json(error);
             } else {
-                res.locals.userData = results;
+                res.locals.data = results;
                 next();
             }
         };
