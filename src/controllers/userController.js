@@ -24,7 +24,7 @@ module.exports.createUser = (req, res, next) => {
         res.status(201).json({
             user_id: results.insertId,
             username: req.body.username,
-            skillpoints: data.skillpoints
+            data: data
         });                
     };
 
@@ -356,10 +356,13 @@ module.exports.register = (req, res, next) => {
         };
 
         const callback = (error, results) => {
+            console.log(results);
+            
             if(error){
                 console.error("Error register callback: ", error);
                 res.status(500).json(error);
             } else {
+                res.locals.userData = results;
                 next();
             }
         };

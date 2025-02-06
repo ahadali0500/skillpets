@@ -10,17 +10,16 @@ module.exports.selectAllUsers = (callback) => {
 
 
 //Check User 
-module.exports.selectUser = (data, callback) =>
-    {
-        const SQLSTATMENT = `
+module.exports.selectUser = (data, callback) => {
+    const SQLSTATMENT = `
         SELECT * FROM User
         WHERE username = ?;
         `;
-        const VALUES = [data.username];
-    
-        pool.query(SQLSTATMENT, VALUES, callback);
-    }
-    
+    const VALUES = [data.username];
+
+    pool.query(SQLSTATMENT, VALUES, callback);
+}
+
 
 //Create user
 module.exports.insertSingle = (data, callback) => {
@@ -28,51 +27,49 @@ module.exports.insertSingle = (data, callback) => {
     INSERT INTO User (username, skillpoints)
     VALUES (?, ?);
     `;
-    const VALUES = [data.username, data.skillpoints]; 
+    const VALUES = [data.username, data.skillpoints];
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
 //Update User by userid
-module.exports.updateById = (data, callback) =>
-    {
-        const SQLSTATMENT = `
+module.exports.updateById = (data, callback) => {
+    const SQLSTATMENT = `
         UPDATE User 
         SET username = ?, skillpoints = ?
         WHERE user_id = ?;
         `;
-        const VALUES = [data.username, data.skillpoints, data.user_id];
-    
-        pool.query(SQLSTATMENT, VALUES, callback);
+    const VALUES = [data.username, data.skillpoints, data.user_id];
 
-    
-    }
+    pool.query(SQLSTATMENT, VALUES, callback);
+
+
+}
 
 
 //Select User Id
-module.exports.selectUserId = (data, callback) =>
-    {
-        const SQLSTATMENT = `
+module.exports.selectUserId = (data, callback) => {
+    const SQLSTATMENT = `
         SELECT * FROM User
         WHERE user_id = ?;
         `;
-        const VALUES = [data.user_id];
-    
-        pool.query(SQLSTATMENT, VALUES, callback);
-    }
+    const VALUES = [data.user_id];
+
+    pool.query(SQLSTATMENT, VALUES, callback);
+}
 
 
 
 
 
-    module.exports.checkUserExistence = (user_id, callback) => {
-        const SQLSTATEMENT = `
+module.exports.checkUserExistence = (user_id, callback) => {
+    const SQLSTATEMENT = `
             SELECT * FROM User
             WHERE user_id = ?;
         `;
-        const VALUES = [user_id];
-    
-        pool.query(SQLSTATEMENT, VALUES, callback);
-    };
-    
+    const VALUES = [user_id];
+
+    pool.query(SQLSTATEMENT, VALUES, callback);
+};
+
 
 
 //selectUserByUserId
@@ -82,11 +79,11 @@ module.exports.selectUserByUserId = (data, callback) => {
         WHERE user_id = ?;
     `;
     const VALUES = [data.user_id];
-  
-    pool.query(SQLSTATEMENT, VALUES, callback);
-  };
 
-  module.exports.fetchUserSkillpoints = (user_id, callback) => {
+    pool.query(SQLSTATEMENT, VALUES, callback);
+};
+
+module.exports.fetchUserSkillpoints = (user_id, callback) => {
     const SQLSTATEMENT = `
         SELECT skillpoints FROM User WHERE user_id = ?;
     `;
@@ -175,22 +172,36 @@ module.exports.login = (data, callback) => {
     `;
 
     VALUES = [data.username];
-    
+
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
 
 module.exports.register = (data, callback) => {
-
-    const SQLSTATEMENT = `
+    const SQL_INSERT = `
         INSERT INTO User (username, email, password)
         VALUES (?, ?, ?);
     `;
 
-    VALUES = [data.username, data.email, data.password];
+    const VALUES = [data.username, data.email, data.password];
 
-    pool.query(SQLSTATEMENT, VALUES, callback);
+    pool.query(SQL_INSERT, VALUES, (error, results) => {
+        if (error) {
+            callback(error, null);
+        } else {
+            // Assuming 'id' is the auto-increment primary key of the User table
+            const SQL_SELECT = 'SELECT * FROM User WHERE user_id = LAST_INSERT_ID();';
+            pool.query(SQL_SELECT, (selectError, selectResults) => {
+                if (selectError) {
+                    callback(selectError, null);
+                } else {
+                    callback(null, selectResults[0]); // return the fetched user
+                }
+            });
+        }
+    });
 };
+
 
 module.exports.readUserByEmailAndUsername = (data, callback) => {
 
